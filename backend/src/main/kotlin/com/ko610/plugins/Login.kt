@@ -12,8 +12,8 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import java.security.KeyFactory
-import java.security.interfaces.ECPrivateKey
-import java.security.interfaces.ECPublicKey
+import java.security.interfaces.RSAPrivateKey
+import java.security.interfaces.RSAPublicKey
 import java.security.spec.PKCS8EncodedKeySpec
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -29,7 +29,7 @@ fun Application.loginRouting() {
         .build()
 
     install(Authentication) {
-        jwt("auth-jwt") {
+        jwt {
             realm = myRealm
             validate { credential ->
                 if (credential.payload.getClaim("username").asString() != "") {
@@ -50,13 +50,13 @@ fun Application.loginRouting() {
             // TODO: ここでDBと照合する
             val publicKey = jwkProvider.get("2f85532c-aaeb-4f74-959b-49143ab1333c").publicKey
             val keySpecPKCS8 = PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKeyString))
-            val privateKey = KeyFactory.getInstance("EC").generatePrivate(keySpecPKCS8)
+            val privateKey = KeyFactory.getInstance("RSA").generatePrivate(keySpecPKCS8)
             val token = JWT.create()
                 .withAudience(audience)
                 .withIssuer(issuer)
                 .withClaim("username", user.name)
                 .withExpiresAt(Date(System.currentTimeMillis() + 60000))
-                .sign(Algorithm.ECDSA256(publicKey as ECPublicKey, privateKey as ECPrivateKey))
+                .sign(Algorithm.RSA256(publicKey as RSAPublicKey, privateKey as RSAPrivateKey))
             call.respond(hashMapOf("token" to token))
         }
         get("/.well-known/jwks.json") {
@@ -71,7 +71,7 @@ fun Application.loginRouting() {
                 call.respond(HttpStatusCode.NotFound)
             }
         }
-        authenticate("auth-jwt") {
+        authenticate {
             get("/hello") {
                 val principal = call.principal<JWTPrincipal>()
                 val username = principal!!.payload.getClaim("username").asString()
