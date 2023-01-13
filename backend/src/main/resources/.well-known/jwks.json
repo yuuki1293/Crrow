@@ -1,0 +1,14 @@
+{
+  "keys": [
+    {
+      "kty": "EC",
+      "crv": "P-256",
+      "x": "ZZO0xPGt_FGLYbyECsalqjoBIVt1WTkixUSw_Jv52qk",
+      "y": "otFJYQKn8v3voeAdbB1g4cNVcyjyoBrq0vzOY3563-c",
+      "kid": "2f85532c-aaeb-4f74-959b-49143ab1333c",
+      "x5c": [
+        "MIIBkDCCATWgAwIBAgIUBTfgin9kH0+p3TSkQPPXdN6LwPIwCgYIKoZIzj0EAwIwHTEbMBkGA1UEAwwSY2xpZW50LmV4YW1wbGUuY29tMB4XDTIzMDExMjAxMzcyMVoXDTI1MTAwODAxMzcyMVowHTEbMBkGA1UEAwwSY2xpZW50LmV4YW1wbGUuY29tMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZZO0xPGt/FGLYbyECsalqjoBIVt1WTkixUSw/Jv52qmi0UlhAqfy/e+h4B1sHWDhw1VzKPKgGurS/M5jfnrf56NTMFEwHQYDVR0OBBYEFGK1w/0CbKERi5ijzHqwtmlLUn1SMB8GA1UdIwQYMBaAFGK1w/0CbKERi5ijzHqwtmlLUn1SMA8GA1UdEwEB/wQFMAMBAf8wCgYIKoZIzj0EAwIDSQAwRgIhAL7s+d8fgi0ejdrCee7cVVj9aBH63w4nwbomfOL7T3BxAiEAh49o0wOE0Bg1VAw7PKylKe3eGvj8z99c51N27WtCzMI="
+      ]
+    }
+  ]
+}

@@ -5,3 +5,8 @@ ktor:
   application:
     modules:
       - com.ko610.ApplicationKt.module
+jwt:
+  privateKey: "privateKey here..."
+  issuer: "http://0.0.0.0:8081/"
+  audience: "http://0.0.0.0:8081/"
+  realm: "Access to 'hello'"
