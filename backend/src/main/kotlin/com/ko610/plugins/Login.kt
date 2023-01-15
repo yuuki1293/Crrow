@@ -33,6 +33,9 @@ fun Application.loginRouting() {
     install(Authentication) {
         jwt("auth-jwt") {
             realm = myRealm
+            verifier(jwkProvider, issuer) {
+                acceptLeeway(3)
+            }
             validate { credential ->
                 if (credential.payload.getClaim("username").asString() != "") {
                     JWTPrincipal(credential.payload)
