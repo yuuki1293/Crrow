@@ -7,10 +7,12 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.auth.jwt.*
+import io.ktor.server.http.content.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import java.io.File
 import java.security.KeyFactory
 import java.security.interfaces.RSAPrivateKey
 import java.security.interfaces.RSAPublicKey
@@ -29,7 +31,7 @@ fun Application.loginRouting() {
         .build()
 
     install(Authentication) {
-        jwt {
+        jwt("auth-jwt") {
             realm = myRealm
             validate { credential ->
                 if (credential.payload.getClaim("username").asString() != "") {
@@ -59,25 +61,17 @@ fun Application.loginRouting() {
                 .sign(Algorithm.RSA256(publicKey as RSAPublicKey, privateKey as RSAPrivateKey))
             call.respond(hashMapOf("token" to token))
         }
-        get("/.well-known/jwks.json") {
-            val file = this.javaClass
-                .classLoader
-                .getResourceAsStream(".well-known/jwks.json")
-                ?.bufferedReader()
-                ?.use { it.readText() }
-            if(!file.isNullOrEmpty()){
-                call.respondText(file)
-            } else {
-                call.respond(HttpStatusCode.NotFound)
-            }
-        }
-        authenticate {
+        authenticate("auth-jwt") {
             get("/hello") {
                 val principal = call.principal<JWTPrincipal>()
                 val username = principal!!.payload.getClaim("username").asString()
                 val expiresAt = principal.expiresAt?.time?.minus(System.currentTimeMillis())
                 call.respondText("Hello, $username! Token is expired at $expiresAt ms.")
             }
+        }
+        static(".well-known") {
+            staticRootFolder = File("certs")
+            file("jwks.json")
         }
     }
 }
