@@ -9,4 +9,5 @@ object Setting : Table("Setting") {
     val email = varchar("email", 20).nullable()
     val school = varchar("school", 13)
     val range = integer("range").default(10)
+    val password = varchar("password", 50)
 }

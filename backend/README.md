@@ -4,7 +4,7 @@
 ```shell
 # 新しくユーザーを作成する
 $uri = 'http://localhost:8081/user'
-$body = [System.Text.Encoding]::UTF8.GetBytes('{"name":"高専太郎","birthday":"2004-05-27","sex":1,"introduction":"こんにちは世界","nickname":"kosentr","icon":"dummy","email":"example@example.com","school":"富山高専"}')
+$body = [System.Text.Encoding]::UTF8.GetBytes('{"name":"高専太郎","birthday":"2004-05-27","sex":1,"introduction":"こんにちは世界","nickname":"kosentr","icon":"dummy","email":"example@example.com","school":"富山高専","password":"1jfc21#fc"}')
 curl -Method Post -Uri $uri -Body $body -ContentType 'application/json' 
 ```
 
@@ -31,7 +31,8 @@ POST /user
   "nickname": "string",
   "icon": "string",
   "email": "example@example.com",
-  "school": "string"
+  "school": "string",
+  "password": "string"
 }
 ```
 #### Detail
@@ -41,8 +42,9 @@ POST /user
 **introduction**: 自己紹介（200文字）  
 **nickname**: ニックネーム（20文字）  
 **icon**: アイコンのファイル名（32文字）  
-**email**: メールアドレス（20文字、任意）。  
+**email**: メールアドレス（20文字、任意）  
 **school**: 学校名（13文字）
+**password**: パスワード（50文字以下）
 #### Responses
 | Status | Description | Schema |
 |:------:|:------------|:-------|

@@ -36,6 +36,7 @@ fun Application.userRouting() {
                         it[icon] = user.icon
                         it[email] = user.email
                         it[school] = user.school
+                        it[password] = user.password
                     }
                 }
                 call.respond(HttpStatusCode.Created)
@@ -148,7 +149,8 @@ data class PostUser(
     val nickname: String,
     val icon: String,
     val email: String?,
-    val school: String
+    val school: String,
+    val password: String
 )
 
 @Serializable
