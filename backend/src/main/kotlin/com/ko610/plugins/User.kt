@@ -1,9 +1,14 @@
 package com.ko610.plugins
 
+import arrow.core.None
+import arrow.core.Some
 import com.ko610.models.Setting
 import com.ko610.models.User
+import com.ko610.util.DBUtil
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -46,94 +51,100 @@ fun Application.userRouting() {
                 call.respond(HttpStatusCode.InternalServerError)
             }
         }
-        delete("/user/{id?}") {
-            try {
-                val strId = call.parameters["id"] ?: return@delete call.respond(HttpStatusCode.NotFound)
-                val intId = strId.toInt()
-                val count = transaction {
-                    addLogger(StdOutSqlLogger)
+        delete("/user") {
+            val user = call.receive<Login>()
+            when (val id = DBUtil.getIdFromName(user.name)) {
+                is None -> call.respond(HttpStatusCode.Unauthorized, "Invalid username or password")
+                is Some -> {
+                    if (DBUtil.passwordValidate(id.value, user.password)) {
+                        try {
+                            val count = transaction {
+                                addLogger(StdOutSqlLogger)
 
-                    Setting.deleteWhere { Setting.userId eq intId }
-                    User.deleteWhere { User.id eq intId }
-                }
+                                Setting.deleteWhere { Setting.userId eq id.value }
+                                User.deleteWhere { User.id eq id.value }
+                            }
 
-                if (count != 1)
-                    call.respond(HttpStatusCode.NotFound)
-                else
-                    call.respond(HttpStatusCode.ResetContent)
-            } catch (ex: NumberFormatException) {
-                call.respond(HttpStatusCode.NotFound)
-            } catch (ex: Exception) {
-                call.respond(HttpStatusCode.InternalServerError)
-            }
-        }
-        get("/user/{id?}") {
-            try {
-                val strId = call.parameters["id"] ?: return@get call.respond(HttpStatusCode.NotFound)
-                val intId = strId.toInt()
-                val userProfile = transaction {
-                    addLogger(StdOutSqlLogger)
-
-                    val user = User.select { User.id eq intId }.single()
-                    val setting = Setting.select { Setting.userId eq intId }.single()
-
-                    GetUser(
-                        name = user[User.name],
-                        birthday = user[User.birthday].toString(),
-                        sex = user[User.sex],
-                        introduction = user[User.introduction],
-                        type = user[User.type],
-                        coin = user[User.coin],
-                        nickname = setting[Setting.nickname],
-                        icon = setting[Setting.icon],
-                        email = setting[Setting.email],
-                        school = setting[Setting.school],
-                        range = setting[Setting.range],
-                    )
-                }
-                call.respondText(Json.encodeToString(userProfile), ContentType.Text.Plain, HttpStatusCode.OK)
-            } catch (ex: NoSuchElementException) {
-                call.respond(HttpStatusCode.NotFound)
-            } catch (ex: NumberFormatException) {
-                call.respond(HttpStatusCode.NotFound)
-            } catch (ex: Exception) {
-                call.respond(HttpStatusCode.InternalServerError)
-            }
-        }
-        put("/user/{id?}") {
-            try {
-                val user = call.receive<UpdateUser>()
-                val strId = call.parameters["id"] ?: return@put call.respond(HttpStatusCode.NotFound)
-                val intId = strId.toInt()
-
-                val count = transaction {
-                    addLogger(StdOutSqlLogger)
-
-                    User.update({ User.id eq intId })
-                    {
-                        it[birthday] = LocalDate.parse(user.birthday)
-                        it[sex] = user.sex
-                        it[introduction] = user.introduction
-                    }
-
-                    Setting.update({ Setting.userId eq intId }) {
-                        it[nickname] = user.nickname
-                        it[icon] = user.icon
-                        it[email] = user.email
-                        it[school] = user.school
-                        it[range] = user.range
+                            if (count != 1)
+                                call.respond(HttpStatusCode.NotFound)
+                            else
+                                call.respond(HttpStatusCode.ResetContent)
+                        } catch (ex: Exception) {
+                            call.respond(HttpStatusCode.InternalServerError)
+                        }
+                    } else {
+                        call.respond(HttpStatusCode.Unauthorized, "Invalid username or password")
                     }
                 }
-                if (count != 1)
+            }
+        }
+        authenticate("auth-jwt") {
+            get("/user") {
+                val principal = call.principal<JWTPrincipal>()
+                val id = principal!!.payload.getClaim("id").asInt()
+
+                try {
+                    val userProfile = transaction {
+                        addLogger(StdOutSqlLogger)
+
+                        val user = User.select { User.id eq id }.single()
+                        val setting = Setting.select { Setting.userId eq id }.single()
+
+                        GetUser(
+                            name = user[User.name],
+                            birthday = user[User.birthday].toString(),
+                            sex = user[User.sex],
+                            introduction = user[User.introduction],
+                            type = user[User.type],
+                            coin = user[User.coin],
+                            nickname = setting[Setting.nickname],
+                            icon = setting[Setting.icon],
+                            email = setting[Setting.email],
+                            school = setting[Setting.school],
+                            range = setting[Setting.range],
+                        )
+                    }
+                    call.respondText(Json.encodeToString(userProfile), ContentType.Text.Plain, HttpStatusCode.OK)
+                } catch (ex: NoSuchElementException) {
                     call.respond(HttpStatusCode.NotFound)
-                else
-                    call.respond(HttpStatusCode.OK)
-            } catch (ex: ContentTransformationException) {
-                call.respond(HttpStatusCode.NotFound)
-            } catch (ex: NumberFormatException) {
-                call.respond(HttpStatusCode.NotFound)
-            } catch (ex: Exception) {
-                call.respond(HttpStatusCode.InternalServerError)
+                } catch (ex: Exception) {
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
+            put("/user/{id?}") {
+                val principal = call.principal<JWTPrincipal>()
+                val id = principal!!.payload.getClaim("id").asInt()
+
+                try {
+                    val user = call.receive<UpdateUser>()
+
+                    val count = transaction {
+                        addLogger(StdOutSqlLogger)
+
+                        User.update({ User.id eq id })
+                        {
+                            it[birthday] = LocalDate.parse(user.birthday)
+                            it[sex] = user.sex
+                            it[introduction] = user.introduction
+                        }
+
+                        Setting.update({ Setting.userId eq id }) {
+                            it[nickname] = user.nickname
+                            it[icon] = user.icon
+                            it[email] = user.email
+                            it[school] = user.school
+                            it[range] = user.range
+                        }
+                    }
+                    if (count != 1)
+                        call.respond(HttpStatusCode.NotFound)
+                    else
+                        call.respond(HttpStatusCode.OK)
+                } catch (ex: ContentTransformationException) {
+                    call.respond(HttpStatusCode.NotFound)
+                } catch (ex: Exception) {
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
             }
         }
     }
