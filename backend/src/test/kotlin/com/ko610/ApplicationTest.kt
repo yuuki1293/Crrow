@@ -1,5 +1,6 @@
 package com.ko610
 
+import com.ko610.dao.DatabaseFactory
 import com.ko610.plugins.Login
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
@@ -16,6 +17,8 @@ class ApplicationTest {
     val password = "1jfc21#fc"
     @Test
     fun testLogin() = testApplication {
+        DatabaseFactory.init()
+
         val client = createClient {
             install(ContentNegotiation) {
                 json()
