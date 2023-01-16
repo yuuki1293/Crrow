@@ -12,6 +12,8 @@ import kotlinx.serialization.*
 import kotlin.test.*
 
 class ApplicationTest {
+    val username = "高専太郎"
+    val password = "1jfc21#fc"
     @Test
     fun testLogin() = testApplication {
         val client = createClient {
@@ -22,7 +24,7 @@ class ApplicationTest {
 
         val responseLogin = client.post("/login"){
             contentType(ContentType.Application.Json)
-            setBody(Login("hoge", "fuga"))
+            setBody(Login(username, password))
         }
         assertEquals(HttpStatusCode.OK, responseLogin.status)
 
