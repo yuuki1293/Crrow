@@ -63,6 +63,7 @@ DELETE /user/&lt;id&gt;
 |  205   | none        | none   |
 |  404   | none        | none   |
 |  500   | none        | none   |
+
 ### Profileを取得
 GET /user/&lt;id&gt;
 既存のプロフィールを取得する。
@@ -74,6 +75,7 @@ GET /user/&lt;id&gt;
 |  200   | none        | none   |
 |  404   | none        | none   |
 |  500   | none        | none   |
+
 ### Profileを更新
 PUT /user/&lt;id&gt;
 既存のプロフィールを更新する。
@@ -92,3 +94,32 @@ PUT /user/&lt;id&gt;
 |  200   | none        | none   |
 |  404   | none        | none   |
 |  500   | none        | none   |
+
+## Login
+### AccessTokenを取得
+POST /login  
+Tokenを取得する。
+#### Body
+```json
+{
+  "name": "string",
+  "password": "string"
+}
+```
+#### Detail
+**name**: ユーザー名
+**password**: パスワード  
+#### Responses
+| Status | Description      | Schema          |
+|:------:|:-----------------|:----------------|
+|  200   | none             | [Token](#Token) |
+|  401   | 無効なユーザー名またはパスワード | none            |
+|  500   | none             | none            |
+
+## Schemas
+### Token
+```json
+{
+  "token": "access token"
+}
+```
