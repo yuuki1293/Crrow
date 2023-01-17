@@ -36,7 +36,7 @@ fun Application.loginRouting(jwkProvider: JwkProvider) {
             .withAudience(audience)
             .withIssuer(issuer)
             .withClaim("id", id)
-            .withExpiresAt(Date(System.currentTimeMillis() + 60000))
+            .withExpiresAt(Date(System.currentTimeMillis() + 1800000))
             .sign(Algorithm.RSA256(publicKey as RSAPublicKey, privateKey as RSAPrivateKey))
     }
 
