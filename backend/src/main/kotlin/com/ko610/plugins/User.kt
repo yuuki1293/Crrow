@@ -111,7 +111,7 @@ fun Application.userRouting() {
                     call.respond(HttpStatusCode.InternalServerError)
                 }
             }
-            put("/user/{id?}") {
+            put("/user") {
                 val principal = call.principal<JWTPrincipal>()
                 val id = principal!!.payload.getClaim("id").asInt()
 
