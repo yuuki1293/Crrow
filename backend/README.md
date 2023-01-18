@@ -9,9 +9,20 @@ curl -Method Post -Uri $uri -Body $body -ContentType 'application/json'
 ```
 
 ```shell
+# アクセストークンを取得する
+$uri = 'http://localhost:8081/login'
+$body = [System.Text.Encoding]::UTF8.GetBytes('{"name":"高専太郎","password":"1jfc21#fc"}')
+curl -Method Post -Uri $uri -Body $body -ContentType 'application/json'
+```
+
+```shell
 # ユーザーを更新する
-$uri = 'http://localhost:8081/user/1'
+$uri = 'http://localhost:8081/user'
 $body = [System.Text.Encoding]::UTF8.GetBytes('{"birthday":"2004-12-27","sex":0,"introduction":"こんにちは世界","nickname":"kosentr","icon":"dummy","email":"example@example.com","school":"福島高専","range":10}')
+$token = 'access token here...'
+$headers = @{
+    Authorization="Bearer $token"
+}
 curl -Method Put -Uri $uri -Body $body -ContentType 'application/json' 
 ```
 
@@ -53,22 +64,28 @@ POST /user
 |  500   | none        | none   |
 
 ### Userを削除
-DELETE /user/&lt;id&gt;  
+DELETE /user  
 既存のユーザーを削除する。
+#### Body
+```json
+{
+  "name": "string",
+  "password": "string"
+}
+```
 #### Detail
-**id**: ユーザーのid  
+**name**: ユーザー名
+**password**: パスワード
 #### Responses
-| Status | Description | Schema |
-|:------:|:------------|:-------|
-|  205   | none        | none   |
-|  404   | none        | none   |
-|  500   | none        | none   |
+| Status | Description      | Schema |
+|:------:|:-----------------|:-------|
+|  205   | none             | none   |
+|  401   | 無効なユーザー名またはパスワード | none   |
+|  500   | none             | none   |
 
 ### Profileを取得
-GET /user/&lt;id&gt;
+GET /user
 既存のプロフィールを取得する。
-#### Detail
-**id**: ユーザーのid
 #### Responses
 | Status | Description | Schema |
 |:------:|:------------|:-------|
@@ -77,7 +94,7 @@ GET /user/&lt;id&gt;
 |  500   | none        | none   |
 
 ### Profileを更新
-PUT /user/&lt;id&gt;
+PUT /user
 既存のプロフィールを更新する。
 #### Detail
 **id**: ユーザーのid 
